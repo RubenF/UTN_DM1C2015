@@ -26,9 +26,9 @@ if(!require("sqldf"))
 library(sqldf)
 
 # Cargo los datos del banco
-message("Importando datoos...")
-datos_banco <- read.table("banco.csv", sep = ",", header = T)
-message("Importando datos. LISTO")
+message("Cargando datos...")
+datos_banco <- read.table("banco4_remix.csv", sep = ",", header = T)
+message("Carga de datos --> LISTO!!!")
 
 # Verifico parte de los datos cargados
 head(datos_banco)
@@ -38,7 +38,6 @@ tail(datos_banco)
 
 # Re escalo la varible y para que "si" sea la clase por defecto
 class(datos_banco$edad)
-datos_banco
 datos_banco <- within(datos_banco, y <- relevel(y, ref = "si"))
 
 # COnstruyo las métricas
@@ -74,14 +73,19 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
   #         NO	-100		0
   #
   #
-  plata <-         750 * sum(predicho == "si" & data$obs== "si")
-  plata <- plata - 100 * sum(predicho == "si" & data$obs== "no")
-  plata <- plata - 850 * sum(predicho == "no" & data$obs== "si")
-  names(plata) <- "Plata"
+  plataCosto <-         750 * sum(predicho == "si" & data$obs== "si")
+  plataCosto <- plataCosto - 100 * sum(predicho == "si" & data$obs== "no")
+  plataCosto <- plataCosto - 750 * sum(predicho == "no" & data$obs== "si")
+  names(plataCosto) <- "PlataCosto"
+  
+  plataGcia <-       - 750 * sum(predicho == "si" & data$obs== "si")
+  plataGcia <- plataCosto + 100 * sum(predicho == "si" & data$obs== "no")
+  plataGcia <- plataCosto + 750 * sum(predicho == "no" & data$obs== "si")
+  names(plataGcia) <- "PlataGcia"
   
   # Armo el vector de outPut
-  outPut <- c(F1_score, plata, prec, recall)
-  names(outPut) <- c("F1_score", "Plata", "Precission" , "Recall")
+  outPut <- c(F1_score, plataCosto, plataGcia, prec, recall)
+  names(outPut) <- c("F1_score", "PlataCosto", "PlataGcia", "Precission" , "Recall")
   
   # Agrego a la salida el valor del área bajo la curva roc
   auc_metrics <- twoClassSummary(data, lev, model)
@@ -91,9 +95,10 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
 }
 message("Armado de la función METRICAS. LISTO")
 
-# Estructura del experimento
-fitControl <- trainControl(method = "cv", #CV --> Cross Validation
-                           number = 3,    # Lo parte en 3
+# Fitcontrol es la variable donde guardo el diseño de mi experimento.
+#Estructura del experimento
+fitControl <- trainControl(method = "cv",     #CV --> Cross Validation
+                           number = 3,        # 3 folds
                            verboseIter = T,
                            classProbs = TRUE,
                            summaryFunction = metricas)
@@ -101,10 +106,25 @@ fitControl <- trainControl(method = "cv", #CV --> Cross Validation
 # Prueba con árbol de decisión 
 #(listado con otros modelos: http://topepo.github.io/caret/modelList.html)
 
-modelo <- train(y ~ ., data = datos_banco,
-                method = "rpart",
-                trControl = fitControl,
-                metric = "Plata")
+# Voy a entrenar un modelo
+modelo <- train(y ~ .,                      # Voy a predecir y
+                data = datos_banco,         #  sobre el dataset: datos_banco
+                method = "rpart",           # Mi modelo en este caso es un "Arbol de decision" (rpart)
+                trControl = fitControl,     # Lo entreno con una estructura, que es la variable que creé antes
+                metric = "PlataCosto")       
 
+print(modelo)
+plot(modelo)
+ggplot(modelo)
 
+# Corro el experimento
+logisticFit <- train(y ~ ., 
+                     data = datos_banco,
+                     method = "glm",         #glm --> regresion logistica
+                     trControl = fitControl,
+                     family = binomial)
+
+# Imprimo el experimento
+print(logisticFit)
+plot(logisticFit)
 
