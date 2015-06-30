@@ -24,6 +24,9 @@ library(pROC)
 if(!require("sqldf")) 
   install.packages("sqldf")
 library(sqldf)
+if(!require("dplyr")) 
+  install.packages("dplyr")
+library(dplyr)
 
 # Cargo los datos del banco
 message("Cargando datos...")
@@ -35,6 +38,23 @@ head(datos_banco)
 str(datos_banco)
 summary(datos_banco) 
 tail(datos_banco)
+
+# Analisis exploratorio de datos
+boxplot(datos_banco$edad)
+median(datos_banco$edad)
+plot(density((datos_banco$edad)))
+hist(datos_banco$edad, col = "green")
+hist(datos_banco$dia, col = "red", breaks = 3)
+hist(datos_banco$duracion, col = "blue", breaks = 50)
+hist(datos_banco$edad, col = "green", breaks =6)
+plot(density((datos_banco$balance)))
+hist(datos_banco$balance, col = "green")
+rug(datos_banco$balance)
+hist(datos_banco$balance, col = "green",breaks = 5)
+hist(datos_banco$balance, col = "green")
+abline(v = 12, lwd = 2)
+abline(v = median(datos_banco$balance), col = "magenta", lwd = 4)
+
 
 # Re escalo la varible y para que "si" sea la clase por defecto
 class(datos_banco$edad)
@@ -73,19 +93,14 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
   #         NO	-100		0
   #
   #
-  plataCosto <-         750 * sum(predicho == "si" & data$obs== "si")
-  plataCosto <- plataCosto - 100 * sum(predicho == "si" & data$obs== "no")
-  plataCosto <- plataCosto - 750 * sum(predicho == "no" & data$obs== "si")
-  names(plataCosto) <- "PlataCosto"
-  
-  plataGcia <-       - 750 * sum(predicho == "si" & data$obs== "si")
-  plataGcia <- plataCosto + 100 * sum(predicho == "si" & data$obs== "no")
-  plataGcia <- plataCosto + 750 * sum(predicho == "no" & data$obs== "si")
-  names(plataGcia) <- "PlataGcia"
+  plata <-         750 * sum(predicho == "si" & data$obs== "si")
+  plata <- plata - 100 * sum(predicho == "si" & data$obs== "no")
+  plata <- plata - 750 * sum(predicho == "no" & data$obs== "si")
+  names(plata) <- "Plata"
   
   # Armo el vector de outPut
-  outPut <- c(F1_score, plataCosto, plataGcia, prec, recall)
-  names(outPut) <- c("F1_score", "PlataCosto", "PlataGcia", "Precission" , "Recall")
+  outPut <- c(F1_score, plata, prec, recall)
+  names(outPut) <- c("F1_score", "Plata", "Precission" , "Recall")
   
   # Agrego a la salida el valor del área bajo la curva roc
   auc_metrics <- twoClassSummary(data, lev, model)
@@ -111,7 +126,7 @@ modelo <- train(y ~ .,                      # Voy a predecir y
                 data = datos_banco,         #  sobre el dataset: datos_banco
                 method = "rpart",           # Mi modelo en este caso es un "Arbol de decision" (rpart)
                 trControl = fitControl,     # Lo entreno con una estructura, que es la variable que creé antes
-                metric = "PlataCosto")       
+                metric = "Plata")       
 
 print(modelo)
 plot(modelo)
