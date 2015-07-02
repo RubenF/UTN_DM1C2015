@@ -1,5 +1,5 @@
 # Posgrado Introducción a la Minería de Datos
-# Proyecto Banco
+# Proyecto Banco -
 # Autor: Ing. Ruben Flecha 
 
 # Elimino todo lo que haya en memoria
