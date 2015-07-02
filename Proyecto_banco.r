@@ -1,6 +1,6 @@
 # Posgrado Introducción a la Minería de Datos
 # Proyecto Banco
-# Autores: Ruben Flecha - Guido Kosloff
+# Autor: Ing. Ruben Flecha 
 
 # Elimino todo lo que haya en memoria
 rm(list=ls())
@@ -12,25 +12,22 @@ setwd("C:/Users/Ruben/UTN_DM1C2015")
 getwd()
 
 # Importo librerías
-if(!require("ggplot2")) 
-  install.packages("ggplot2")
+if(!require("ggplot2")) install.packages("ggplot2")
 library(ggplot2)
-if(!require("caret")) 
-  install.packages("caret")
+if(!require("caret"))  install.packages("caret")
 library(caret)
-if(!require("pROC"))  
-  install.packages("pROC")
+if(!require("pROC"))  install.packages("pROC")
 library(pROC)
-if(!require("sqldf")) 
-  install.packages("sqldf")
+if(!require("sqldf")) install.packages("sqldf")
 library(sqldf)
-if(!require("dplyr")) 
-  install.packages("dplyr")
+if(!require("dplyr")) install.packages("dplyr")
 library(dplyr)
+if(!require("doParallel"))  install.packages("doParallel")
+library(doParallel)
 
 # Cargo los datos del banco
 message("Cargando datos...")
-datos_banco <- read.table("banco4_remix.csv", sep = ",", header = T)
+datos_banco <- read.table("banco5_remix.csv", sep = ",", header = T)
 message("Carga de datos --> LISTO!!!")
 
 # Verifico parte de los datos cargados
@@ -60,7 +57,15 @@ abline(v = median(datos_banco$balance), col = "magenta", lwd = 4)
 class(datos_banco$edad)
 datos_banco <- within(datos_banco, y <- relevel(y, ref = "si"))
 
-# COnstruyo las métricas
+# Separo en training y testing ()
+set.seed(1234) # Semilla para que todos tengamos lo mismo
+muestra <- sample(c(1:nrow(datos_banco)),
+                  size = nrow(datos_banco)/10,
+                  replace=FALSE)
+BancoTraining <- datos_banco[-muestra,]
+BancoTesting  <- datos_banco[muestra,]
+
+# Construyo las métricas
 message("Armado de la función METRICAS....")
 metricas <- function(data, lev = NULL, model = NULL, ...) 
   {
@@ -84,15 +89,7 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
   # Recall
   recall <- sum(predicho == "si" & data$obs== "si") / sum(data$obs == "si")
   
-  #Me Interesa evaluar con otra variable que a mi me interese, por ejemplo: Plata! 
-  # En plata
-  #
-  #             PREDICHO
-  #             SI		NO
-  #   REAL	SI	750		-750
-  #         NO	-100		0
-  #
-  #
+  #Me Interesa evaluar con otra variable que a mi me interese, por ejemplo: Plata 
   plata <-         750 * sum(predicho == "si" & data$obs== "si")
   plata <- plata - 100 * sum(predicho == "si" & data$obs== "no")
   plata <- plata - 750 * sum(predicho == "no" & data$obs== "si")
@@ -122,24 +119,32 @@ fitControl <- trainControl(method = "cv",     #CV --> Cross Validation
 #(listado con otros modelos: http://topepo.github.io/caret/modelList.html)
 
 # Voy a entrenar un modelo
-modelo <- train(y ~ .,                      # Voy a predecir y
-                data = datos_banco,         #  sobre el dataset: datos_banco
+#-------------------------------
+modelorpart <-  train(y ~ .,                # Voy a predecir y
+                data = BancoTraining,       #  sobre el dataset: BancoTraining
                 method = "rpart",           # Mi modelo en este caso es un "Arbol de decision" (rpart)
                 trControl = fitControl,     # Lo entreno con una estructura, que es la variable que creé antes
                 metric = "Plata")       
 
-print(modelo)
-plot(modelo)
-ggplot(modelo)
-
-# Corro el experimento
+print(modelorpart)
+plot(modelorpart)
+ggplot(modelorpart)
+#----------------------------------------------------------------------------------
+# Regresion Logistica
 logisticFit <- train(y ~ ., 
                      data = datos_banco,
                      method = "glm",         #glm --> regresion logistica
                      trControl = fitControl,
                      family = binomial)
 
-# Imprimo el experimento
 print(logisticFit)
 plot(logisticFit)
+#-----------------------------------------------------------------------------------
+# Modelo Random Forest
+modelorf <- train(y ~ ., 
+            data = BancoTraining,
+            method = "rf",
+            trControl = fitControl,
+            metric = "Plata")
 
+print(modelorf)
