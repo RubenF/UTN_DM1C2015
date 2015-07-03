@@ -1,0 +1,29 @@
+FECHA: 1-7-15
+DATASET: danco6_remix.csv
+-------------------------------------------------------------------------------------------------------------------------------------
+p=0,5
+Tiempo= 38'
+
+> print(Modeloknn)
+k-Nearest Neighbors 
+
+32504 samples
+   26 predictor
+    2 classes: 'no', 'si' 
+
+No pre-processing
+Resampling: Cross-Validated (3 fold) 
+
+Summary of sample sizes: 21669, 21669, 21670 
+
+Resampling results across tuning parameters:
+
+  k  F1_score   Plata      Precission  Recall     ROC        F1_score SD  Plata SD   Precission SD  Recall SD    ROC SD     
+  5  0.2773878  -607033.3  0.4494367   0.2007280  0.7144274  0.013018065  22182.050  0.01419203     0.012117712  0.002673050
+  7  0.2710822  -625200.0  0.4849186   0.1882475  0.7385920  0.003596914   7918.965  0.01653478     0.005193704  0.001561297
+  9  0.2666976  -635200.0  0.5017266   0.1817473  0.7536390  0.005514753  10451.794  0.01707398     0.006384831  0.003557465
+
+F1_score was used to select the optimal model using  the largest value.
+The final value used for the model was k = 5. 
+> 
+

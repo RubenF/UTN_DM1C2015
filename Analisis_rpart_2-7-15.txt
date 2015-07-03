@@ -1,0 +1,56 @@
+FECHA: 1-7-15
+DATASET: danco5_remix.csv
+-------------------------------------------------------------------------------------------------------------------------------------
+p=0,5
+Tiempo= 20''
+
+> print(modelorpart)
+CART 
+
+32504 samples
+   26 predictor
+    2 classes: 'no', 'si' 
+
+No pre-processing
+Resampling: Cross-Validated (3 fold) 
+
+Summary of sample sizes: 21669, 21669, 21670 
+
+Resampling results across tuning parameters:
+
+  cp           F1_score   Plata       Precission  Recall     ROC        F1_score SD  Plata SD   Precission SD  Recall SD   ROC SD    
+  0.007020281  0.5381633   -54966.67  0.6134023   0.4927197  0.8513317  0.06523631   212990.74  0.03539661     0.11847833  0.07490134
+  0.024180967  0.4720485  -254333.33  0.6199056   0.3835153  0.7694834  0.03866973    98777.65  0.02902526     0.05404965  0.01008475
+  0.034906396  0.1460600  -749900.00  0.5986486   0.1151846  0.5874973  0.25298335   366501.95          NA     0.19950559  0.15154981
+
+Plata was used to select the optimal model using  the largest value.
+The final value used for the model was cp = 0.007020281. 
+-------------------------------------------------------------------------------------------------------------------------------------
+
+p=0.3
+Tiempo= 20''
+
+> print(modelorpart)
+CART 
+
+32504 samples
+   26 predictor
+    2 classes: 'si', 'no' 
+
+No pre-processing
+Resampling: Cross-Validated (3 fold) 
+
+Summary of sample sizes: 21669, 21669, 21670 
+
+Resampling results across tuning parameters:
+
+  cp           F1_score   Plata       Precission  Recall     ROC        F1_score SD  Plata SD  Precission SD  Recall SD  ROC SD    
+  0.007020281  0.5696789   216966.67  0.5204190   0.6544462  0.8513317  0.04222743   263805.1  0.04342833     0.1524717  0.07490134
+  0.024180967  0.5312415    45966.67  0.5131765   0.5603224  0.7694834  0.01256674   118742.1  0.04971252     0.0722712  0.01008475
+  0.034906396  0.1757362  -615233.33  0.4819121   0.1939678  0.5874973  0.30438396   599751.5          NA     0.3359620  0.15154981
+
+Plata was used to select the optimal model using  the largest value.
+The final value used for the model was cp = 0.007020281. 
+> 
+
+----------------------------------------------------------------------------------------------------------------------------------

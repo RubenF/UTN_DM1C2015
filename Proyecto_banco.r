@@ -20,14 +20,20 @@ if(!require("pROC"))  install.packages("pROC")
 library(pROC)
 if(!require("sqldf")) install.packages("sqldf")
 library(sqldf)
+if(!require("plyr")) install.packages("plyr")
+library(plyr)
 if(!require("dplyr")) install.packages("dplyr")
 library(dplyr)
 if(!require("doParallel"))  install.packages("doParallel")
 library(doParallel)
+library(rpart)
+library(C50)
+library(mlbench)
+
 
 # Cargo los datos del banco
 message("Cargando datos...")
-datos_banco <- read.table("banco5_remix.csv", sep = ",", header = T)
+datos_banco <- read.table("banco6_remix.csv", sep = ",", header = T)
 message("Carga de datos --> LISTO!!!")
 
 # Verifico parte de los datos cargados
@@ -73,7 +79,7 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
   # Armo la clase predicha en función a una p
   # Probabilidad que voy a usar como corte para un "si"
   
-  predicho <- ifelse(data$si > 0.5, "si", "no") 
+  predicho <- ifelse(data$si > 0.3, "si", "no") 
   
   # F1 score. Esta es la métrica que me ayuda a elegir el mejor modelo.
   
@@ -107,44 +113,109 @@ metricas <- function(data, lev = NULL, model = NULL, ...)
 }
 message("Armado de la función METRICAS. LISTO")
 
-# Fitcontrol es la variable donde guardo el diseño de mi experimento.
+#-----------------------------------------------------
 #Estructura del experimento
-fitControl <- trainControl(method = "cv",     #CV --> Cross Validation
-                           number = 3,        # 3 folds
+#-----------------------------------------------------
+fitControl <- trainControl(method = "cv",     
+                           number = 3,        
                            verboseIter = T,
                            classProbs = TRUE,
                            summaryFunction = metricas)
 
-# Prueba con árbol de decisión 
-#(listado con otros modelos: http://topepo.github.io/caret/modelList.html)
-
-# Voy a entrenar un modelo
+#------------------------------------------------------
+# Modelo Arbol de Decision
 #-------------------------------
+#cl <- makeCluster(detectCores())
+#registerDoParallel(cl)
+
 modelorpart <-  train(y ~ .,                # Voy a predecir y
                 data = BancoTraining,       #  sobre el dataset: BancoTraining
                 method = "rpart",           # Mi modelo en este caso es un "Arbol de decision" (rpart)
                 trControl = fitControl,     # Lo entreno con una estructura, que es la variable que creé antes
                 metric = "Plata")       
 
+# Deshabilitar
+#stopCluster(cl)
+
 print(modelorpart)
 plot(modelorpart)
 ggplot(modelorpart)
 #----------------------------------------------------------------------------------
 # Regresion Logistica
+
+horainicio <- Sys.time()
+print(horainicio)
+
 logisticFit <- train(y ~ ., 
-                     data = datos_banco,
+                     data = BancoTraining,
                      method = "glm",         #glm --> regresion logistica
                      trControl = fitControl,
                      family = binomial)
 
+horafin <- Sys.time()
+runningtime <- horafin - horainicio
+print(runningtime)
+
+
 print(logisticFit)
 plot(logisticFit)
 #-----------------------------------------------------------------------------------
+# Vecinos Mas cercanos
+modeloknn <- train(y ~ ., 
+                  data = BancoTraining,
+                  method = "knn",
+                  trControl = fitControl)
+
+# Imprimo el experimento
+print(modeloknn)
+
+#-----------------------------------------------------------------------------------
 # Modelo Random Forest
+horainicio <- Sys.time()
+print(horainicio)
+
 modelorf <- train(y ~ ., 
             data = BancoTraining,
             method = "rf",
             trControl = fitControl,
             metric = "Plata")
 
+horafin <- Sys.time()
+runningtime <- horafin - horainicio
+print(runningtime)
+
 print(modelorf)
+#-----------------------------------------------------------------------------------
+#Modelo C5.0
+horainicio <- Sys.time()
+print(horainicio)
+
+modeloc50 <- train(y ~ ., 
+                   data = BancoTraining,
+                   method = "C5.0",
+                   trControl = fitControl)
+
+horafin <- Sys.time()
+runningtime <- horafin - horainicio
+print(runningtime)
+
+
+print(modeloc50)
+
+#-----------------------------------------------------------------------------------
+# Modelo Gradient Boosting
+
+horainicio <- Sys.time()
+print(horainicio)
+
+modelogboost <- train(y ~ ., data = BancoTraining,
+                method = "gbm",
+                trControl = fitControl,
+                tuneLength = 20,
+                verbose = FALSE)
+
+horafin <- Sys.time()
+runningtime <- horafin - horainicio
+print(modelogboost)
+
+plot(modelogboost)

@@ -1,0 +1,25 @@
+FECHA:2-7-15
+DATASET: danco6_remix.csv
+-------------------------------------------------------------------------------------------------------------------------------------
+p=0,5
+Tiempo= 20''
+
+
+> print(logisticFit)
+Generalized Linear Model 
+
+32504 samples
+   26 predictor
+    2 classes: 'no', 'si' 
+
+No pre-processing
+Resampling: Cross-Validated (3 fold) 
+
+Summary of sample sizes: 21669, 21669, 21670 
+
+Resampling results
+
+  F1_score   Plata   Precission  Recall     ROC        F1_score SD  Plata SD  Precission SD  Recall SD   ROC SD    
+  0.5923405  151400  0.5775822   0.6084243  0.9215346  0.008173769  42788.67  0.007102078    0.02421868  0.00592376
+
+ 

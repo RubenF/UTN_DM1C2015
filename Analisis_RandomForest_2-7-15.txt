@@ -1,0 +1,27 @@
+FECHA:2-7-15
+DATASET: danco6_remix.csv
+-------------------------------------------------------------------------------------------------------------------------------------
+p=0,3
+
+> print(modelorf)
+Random Forest 
+
+32504 samples
+   26 predictor
+    2 classes: 'si', 'no' 
+
+No pre-processing
+Resampling: Cross-Validated (3 fold) 
+
+Summary of sample sizes: 21669, 21669, 21670 
+
+Resampling results across tuning parameters:
+
+  mtry  F1_score   Plata      Precission  Recall     ROC        F1_score SD  Plata SD  Precission SD  Recall SD    ROC SD      
+   2    0.3915699  -451333.3  0.6889927   0.2735309  0.9261256  0.004263308   8510.19  0.004481318    0.004701805  0.0024082415
+  35    0.6449516   490133.3  0.5401069   0.8003120  0.9412128  0.005819234  12859.37  0.005547414    0.006092238  0.0008180656
+  68    0.6428746   489533.3  0.5371234   0.8005720  0.9390064  0.007657996  21701.92  0.008041245    0.011419756  0.0008431294
+
+Plata was used to select the optimal model using  the largest value.
+The final value used for the model was mtry = 35. 
+> 
